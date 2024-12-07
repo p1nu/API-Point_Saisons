@@ -1,20 +1,20 @@
-# # Node.js dependencies
-# node_modules/
+# Node.js dependencies
+node_modules/
 
-# # Logs
-# logs
-# *.log
-# npm-debug.log*
+# Logs
+logs
+*.log
+npm-debug.log*
 
-# # Environment Variables
-# .env
+# Environment Variables
+.env
 
-# # OS-specific files
-# Thumbs.db
-# .DS_Store
+# OS-specific files
+Thumbs.db
+.DS_Store
 
-# # Others
-# coverage/
+# Others
+coverage/
 
-./env
-/node_moduels
+# ./env
+# /node_moduels
