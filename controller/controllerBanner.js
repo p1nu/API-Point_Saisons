@@ -112,6 +112,8 @@ const getFeatureBanners = async (req, res) => {
         banners.banner_id, 
         banners.banner_company_id,
         banners.banner_name,
+        banners.slider_title,
+        banners.slider_desc,
         image_library.il_id AS image_id,
         image_library.il_path AS image_path
       FROM
@@ -355,6 +357,11 @@ const createBanner = async (req, res) => {
 const updateBannerShowInSlider = async (req, res) => {
   const { id } = req.params;
   try {
+    const { slider_title, slider_desc } = req.body;
+
+    // Log the request body to verify the values
+    console.log('Request Body:', req.body);
+
     // Retrieve the company ID of the selected banner
     const [bannerResult] = await db.query(
       "SELECT banner_company_id FROM banners WHERE banner_id = ?",
@@ -366,21 +373,26 @@ const updateBannerShowInSlider = async (req, res) => {
     const companyId = bannerResult[0].banner_company_id;
 
     // Set show_in_slider to false for all banners of the company
-    await db.query(
+    const updateAllBanners = await db.query(
       "UPDATE banners SET show_in_slider = false WHERE banner_company_id = ?",
       [companyId]
     );
+    // console.log('Update All Banners Result:', updateAllBanners);
 
     // Set show_in_slider to true for the selected banner
-    await db.query(
-      "UPDATE banners SET show_in_slider = true WHERE banner_id = ?",
-      [id]
+    const updateSelectedBanner = await db.query(
+      "UPDATE banners SET show_in_slider = true, slider_title = ?, slider_desc = ? WHERE banner_id = ?",
+      [slider_title, slider_desc, id]
     );
+    // console.log('Update Selected Banner Result:', updateSelectedBanner);
 
-    res.sendStatus(200);
+    // Send the response after successful updates
+    res.status(200).json({ message: "Banner updated", banner_id: id, slider_title, slider_desc });
   } catch (error) {
     console.error("Error updating banner:", error);
-    res.status(500).json({ error: "Failed to update banner" });
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to update banner" });
+    }
   }
 };
 
