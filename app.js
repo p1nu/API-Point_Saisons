@@ -12,6 +12,7 @@ const routerBanner = require('./routes/routeBanner.js');
 const routerContact = require('./routes/routeContact.js');
 const routerMission = require('./routes/routeMission.js');
 const routerContactForm = require('./routes/routeContactForm.js');
+const routerProducts = require('./routes/routeProducts.js');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -68,6 +69,9 @@ app.use('/mission', routerMission);
 
 //Contact Form routes
 app.use('/form', routerContactForm);
+
+//Product routes
+app.use('/product', routerProducts);
 
 // app.use('/api', router);
 

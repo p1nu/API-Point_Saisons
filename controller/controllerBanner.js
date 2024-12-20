@@ -360,7 +360,7 @@ const updateBannerShowInSlider = async (req, res) => {
     const { slider_title, slider_desc } = req.body;
 
     // Log the request body to verify the values
-    console.log('Request Body:', req.body);
+    // console.log('Request Body:', req.body);
 
     // Retrieve the company ID of the selected banner
     const [bannerResult] = await db.query(
@@ -387,7 +387,7 @@ const updateBannerShowInSlider = async (req, res) => {
     // console.log('Update Selected Banner Result:', updateSelectedBanner);
 
     // Send the response after successful updates
-    res.status(200).json({ message: "Banner updated", banner_id: id, slider_title, slider_desc });
+    res.status(200).json({ message: "Banner updated" });
   } catch (error) {
     console.error("Error updating banner:", error);
     if (!res.headersSent) {
