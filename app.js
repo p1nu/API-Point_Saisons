@@ -22,11 +22,26 @@ const app = express();
 
 dotenv.config();
 
+const allowedOrigins = [
+  'http://174.16.10.135:5173',
+  'http://174.16.10.135:5174',
+  'http://124.248.180.193:5173',
+  'http://124.248.180.193:5174',
+];
+
 app.use(cors({
-  origin: 'http://174.16.10.135:5173', // Your frontend app's IP and port
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  // other options...
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

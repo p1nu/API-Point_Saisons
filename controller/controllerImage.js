@@ -11,7 +11,9 @@ const storage = multer.diskStorage({
     cb(null, "uploads");
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    // Remove spaces from the original file name
+    const sanitizedFilename = file.originalname.replace(/\s+/g, '');
+    cb(null, `${Date.now()}-${sanitizedFilename}`);
   },
 });
 
@@ -32,7 +34,7 @@ const upload = multer({
   },
 });
 
-//Upload image 
+// Upload image 
 const uploadImage = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded.' });
@@ -52,7 +54,7 @@ const uploadImage = async (req, res) => {
   }
 };
 
-//Upload images
+// Upload images
 const uploadImages = async (req, res) => {
   try {
     const files = req.files;
@@ -64,7 +66,7 @@ const uploadImages = async (req, res) => {
     }
 
     const imagesData = files.map((file) => [
-      file.originalname,
+      file.originalname, // Sanitize file name
       file.filename,
       il_company_id,
       il_create_date,
@@ -89,7 +91,7 @@ const uploadImages = async (req, res) => {
   }
 };
 
-//Delete image
+// Delete image
 const deleteImage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,7 +128,7 @@ const deleteImage = async (req, res) => {
   }
 };
 
-//Delete images
+// Delete images
 const deleteImages = async (req, res) => {
   try {
     const { il_path } = req.body;
@@ -142,7 +144,7 @@ const deleteImages = async (req, res) => {
   }
 };
 
-//Get all images
+// Get all images
 const getImages = async (req, res) => {
   try {
     const query = "SELECT * FROM image_library";
@@ -156,7 +158,7 @@ const getImages = async (req, res) => {
   }
 };
 
-//Get image by id
+// Get image by id
 const getImage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -171,7 +173,7 @@ const getImage = async (req, res) => {
   }
 };
 
-//Update image
+// Update image
 const updateImage = async (req, res) => {
   try {
     const { il_id, il_name, il_path, il_company_id } = req.body;

@@ -6,6 +6,7 @@ const {
   getProductByCategory,
   getProductByCompanyAndCategory,
   getCategoriesByCompany,
+  getCategories,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -24,6 +25,9 @@ routerProducts.get('/company/:id', getProductByCompany);
 
 // Get categories by company id
 routerProducts.get('/company/:id/categories', getCategoriesByCompany);
+
+// Get all categories
+routerProducts.get('/categories', getCategories);
 
 // Get products by category
 routerProducts.get('/category/:category', getProductByCategory);

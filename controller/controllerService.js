@@ -38,27 +38,29 @@ const getServiceByCompany = async (req, res) => {
 
 // Create a new service
 const createService = async (req, res) => {
-  const service_create_date = new Date();
   try {
+    const service_create_date = new Date();
     const {
       service_name,
       service_desc,
       service_value,
       service_vision,
       service_mission,
+      service_link,
       service_logo,
       service_company_id,
       service_status_id,
       service_created_by_user_id,
     } = req.body;
     await db.query(
-      "INSERT INTO services (service_name, service_desc, service_value, service_vision, service_mission, service_logo, service_company_id, service_status_id, service_create_date, service_created_by_user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO services (service_name, service_desc, service_value, service_vision, service_mission, service_link, service_logo, service_company_id, service_status_id, service_create_date, service_created_by_user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         service_name,
         service_desc,
         service_value,
         service_vision,
         service_mission,
+        service_link,
         service_logo,
         service_company_id,
         service_status_id,
@@ -66,16 +68,16 @@ const createService = async (req, res) => {
         service_created_by_user_id,
       ]
     );
-    res.status(201).json({ message: "Service created" });
+    res.status(201).json({ message: "Service created successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 // Update a service
 const updateService = async (req, res) => {
+  const { id } = req.params;
   try {
-    const id = req.params.id;
     const service_update_date = new Date();
     const {
       service_name,
@@ -83,19 +85,21 @@ const updateService = async (req, res) => {
       service_value,
       service_vision,
       service_mission,
+      service_link,
       service_logo,
       service_company_id,
       service_status_id,
       service_updated_by_user_id,
     } = req.body;
     await db.query(
-      "UPDATE services SET service_name = ?, service_desc = ?, service_value = ?, service_vision = ?, service_mission = ?, service_logo = ?, service_company_id = ?, service_status_id = ?, service_update_date = ?, service_updated_by_user_id = ? WHERE service_id = ?",
+      "UPDATE services SET service_name = ?, service_desc = ?, service_value = ?, service_vision = ?, service_mission = ?, service_link = ?, service_logo = ?, service_company_id = ?, service_status_id = ?, service_update_date = ?, service_updated_by_user_id = ? WHERE service_id = ?",
       [
         service_name,
         service_desc,
         service_value,
         service_vision,
         service_mission,
+        service_link,
         service_logo,
         service_company_id,
         service_status_id,
@@ -104,9 +108,9 @@ const updateService = async (req, res) => {
         id,
       ]
     );
-    res.json({ message: "Service updated" });
+    res.status(200).json({ message: "Service updated successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -127,4 +131,11 @@ const deleteService = async (req, res) => {
   }
 };
 
-module.exports = { getServices, getService, getServiceByCompany, createService, updateService, deleteService };
+module.exports = {
+  getServices,
+  getService,
+  getServiceByCompany,
+  createService,
+  updateService,
+  deleteService,
+};

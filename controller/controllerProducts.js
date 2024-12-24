@@ -75,6 +75,22 @@ const getProductByCompanyAndCategory = async (req, res) => {
   }
 }
 
+// Get all categories
+const getCategories = async (req, res) => {
+  try {
+    const [categories] = await db.query('SELECT DISTINCT category FROM products');
+
+    if (categories.length === 0) {
+      return res.status(404).json({ message: 'Categories not found' });
+    }
+
+    res.status(200).json(categories);
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.status(500).json({ message: err.message });
+  }
+}
+
 // Get categories by company id
 const getCategoriesByCompany = async (req, res) => {
   try {
@@ -104,25 +120,23 @@ const createProduct = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (
-      !company_id ||
-      !name ||
-      !description ||
-      !category ||
-      !price ||
-      !image
-    ) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    const create_date = new Date();
+    // if (
+    //   !company_id ||
+    //   !name ||
+    //   !description ||
+    //   !category ||
+    //   !price ||
+    //   !image
+    // ) {
+    //   return res.status(400).json({ message: 'All fields are required' });
+    // }
 
     const [newProduct] = await db.query(
       `INSERT INTO products
-        (name, description, category, price, image, company_id, create_date) 
+        (name, description, category, price, image, company_id) 
        VALUES 
-        (?, ?, ?, ?, ?, ?, ?)`,
-      [name, description, category, price, image, company_id, create_date]
+        (?, ?, ?, ?, ?, ?)`,
+      [name, description, category, price, image, company_id]
     );
 
     res.status(201).json({ message: 'Product created' });
@@ -206,6 +220,7 @@ module.exports = {
   getProductByCategory,
   getProductByCompanyAndCategory,
   getCategoriesByCompany,
+  getCategories,
   createProduct,
   updateProduct,
   deleteProduct,
