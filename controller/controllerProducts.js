@@ -1,228 +1,218 @@
-const db = require('../data/db.js');
+const db = require("../data/db.js");
 
-// Get all Products
+// Get all products
 const getProducts = async (req, res) => {
   try {
-    const [products] = await db.query('SELECT * FROM products');
+    const [products] = await db.query(
+      "SELECT * FROM products"
+    );
     res.status(200).json(products);
-  } catch (err) {
-    console.error('Error fetching products:', err);
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 }
 
-// Get Product by ID
-const getProductById = async (req, res) => {
+// Get a product
+const getProduct = async (req, res) => {
   try {
-    const [product] = await db.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    const id = req.params.id;
+    const query = `
+      SELECT 
+        * 
+      FROM 
+        products 
+      WHERE 
+        product_id = ?
+    `;
+    const [product] = await db.query(query, [id]);
 
     if (product.length === 0) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     res.status(200).json(product[0]);
-  } catch (err) {
-    console.error('Error fetching product by ID:', err);
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 }
 
-// Get Product by Company ID
-const getProductByCompany = async (req, res) => {
-  try {
-    const [product] = await db.query('SELECT * FROM products WHERE company_id = ?', [req.params.id]);
-
-    if (product.length === 0) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    res.status(200).json(product);
-  } catch (err) {
-    console.error('Error fetching product by company ID:', err);
-    res.status(500).json({ message: err.message });
-  }
-}
-
-// Get Product by category name
-const getProductByCategory = async (req, res) => {
-  try {
-    const [product] = await db.query('SELECT * FROM products WHERE category = ?', [req.params.category]);
-
-    if (product.length === 0) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    res.status(200).json(product);
-  } catch (err) {
-    console.error('Error fetching product by category:', err);
-    res.status(500).json({ message: err.message });
-  }
-}
-
-// Get product by company id and category 
-const getProductByCompanyAndCategory = async (req, res) => {
-  try {
-    const [product] = await db.query('SELECT * FROM products WHERE company_id = ? AND category = ?', [req.params.id, req.params.category]);
-
-    if (product.length === 0) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    res.status(200).json(product);
-  } catch (err) {
-    console.error('Error fetching product by company ID and category:', err);
-    res.status(500).json({ message: err.message });
-  }
-}
-
-// Get all categories
-const getCategories = async (req, res) => {
-  try {
-    const [categories] = await db.query('SELECT DISTINCT category FROM products');
-
-    if (categories.length === 0) {
-      return res.status(404).json({ message: 'Categories not found' });
-    }
-
-    res.status(200).json(categories);
-  } catch (err) {
-    console.error('Error fetching categories:', err);
-    res.status(500).json({ message: err.message });
-  }
-}
-
-// Get categories by company id
-const getCategoriesByCompany = async (req, res) => {
-  try {
-    const [categories] = await db.query('SELECT DISTINCT category FROM products WHERE company_id = ?', [req.params.id]);
-
-    if (categories.length === 0) {
-      return res.status(404).json({ message: 'Categories not found' });
-    }
-
-    res.status(200).json(categories);
-  } catch (err) {
-    console.error('Error fetching categories by company ID:', err);
-    res.status(500).json({ message: err.message });
-  }
-}
-
-// Create Product
+// Create a new product
 const createProduct = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      category,
-      price,
-      image,
-      company_id,
-    } = req.body;
-
-    // Validate required fields
-    // if (
-    //   !company_id ||
-    //   !name ||
-    //   !description ||
-    //   !category ||
-    //   !price ||
-    //   !image
-    // ) {
-    //   return res.status(400).json({ message: 'All fields are required' });
-    // }
-
-    const [newProduct] = await db.query(
-      `INSERT INTO products
-        (name, description, category, price, image, company_id) 
-       VALUES 
-        (?, ?, ?, ?, ?, ?)`,
-      [name, description, category, price, image, company_id]
+    const { product_name, product_desc, company_id, category_ids, product_image, product_price } = req.body;
+    const [result] = await db.query(
+      "INSERT INTO products (product_name, product_desc, company_id, product_image, product_price) VALUES (?, ?, ?, ?, ?)",
+      [product_name, product_desc, company_id, product_image, product_price]
     );
+    const product_id = result.insertId;
 
-    res.status(201).json({ message: 'Product created' });
-  } catch (err) {
-    console.error('Error creating product:', err);
-    res.status(500).json({ message: err.message });
+    for (const category_id of category_ids) {
+      await db.query(
+        "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)",
+        [product_id, category_id]
+      );
+    }
+
+    res.status(201).json({ message: "Product created successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// Update Product
+// Update a product
 const updateProduct = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      category,
-      price,
-      image,
-      company_id,
-    } = req.body;
+    const { product_id } = req.params;
+    const { product_name, product_desc, company_id, category_ids, product_image, product_price } = req.body;
 
-    // Validate required fields
-    if (
-      !company_id ||
-      !name ||
-      !description ||
-      !category ||
-      !price ||
-      !image
-    ) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    const update_date = new Date();
-
-    const [updatedProduct] = await db.query(
-      `UPDATE products
-       SET 
-        name = ?,
-        description = ?,
-        category = ?,
-        price = ?,
-        image = ?,
-        company_id = ?,
-        update_date = ?
-       WHERE id = ?`,
-      [name, description, category, price, image, company_id, update_date, req.params.id]
+    await db.query(
+      "UPDATE products SET product_name = ?, product_desc = ?, company_id = ?, product_image = ?, product_price = ? WHERE product_id = ?",
+      [product_name, product_desc, company_id, product_image, product_price, product_id]
     );
 
-    if (updatedProduct.affectedRows === 0) {
-      return res.status(404).json({ message: 'Product not found' });
+    await db.query("DELETE FROM product_categories WHERE product_id = ?", [product_id]);
+
+    for (const category_id of category_ids) {
+      await db.query(
+        "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)",
+        [product_id, category_id]
+      );
     }
 
-    res.status(200).json({ message: 'Product updated' });
-  } catch (err) {
-    console.error('Error updating product:', err);
-    res.status(500).json({ message: err.message });
+    res.json({ message: "Product updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// Delete Product
+// Delete a product\
 const deleteProduct = async (req, res) => {
   try {
-    const [deletedProduct] = await db.query('DELETE FROM products WHERE id = ?', [req.params.id]);
+    const { product_id } = req.params;
 
-    if (deletedProduct.affectedRows === 0) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    await db.query("DELETE FROM product_categories WHERE product_id = ?", [product_id]);
+    await db.query("DELETE FROM products WHERE product_id = ?", [product_id]);
 
-    res.status(200).json({ message: 'Product deleted' });
-  } catch (err) {
-    console.error('Error deleting product:', err);
-    res.status(500).json({ message: err.message });
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get all products by category
+const getProductsByCategory = async (req, res) => {
+  try {
+    const { category_id } = req.params;
+    const query = `
+      SELECT 
+        p.product_id,
+        p.product_name,
+        p.product_desc,
+        p.company_id,
+        p.product_image,
+        p.product_price
+      FROM 
+        products p
+      JOIN 
+        product_categories pc ON p.product_id = pc.product_id
+      WHERE 
+        pc.category_id = ?
+    `;
+    const [products] = await db.query(query, [category_id]);
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 }
+
+// Get all products by company
+const getProductsByCompany = async (req, res) => {
+  try {
+    const { company_id } = req.params;
+    const query = `
+      SELECT 
+        * 
+      FROM 
+        products 
+      WHERE 
+        company_id = ?
+    `;
+    const [products] = await db.query(query, [company_id]);
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+// Create a new product category
+const createCategory = async (req, res) => {
+  try {
+    const { category_name } = req.body;
+    await db.query(
+      "INSERT INTO categories (category_name) VALUES (?)",
+      [category_name]
+    );
+    res.status(201).json({ message: "Category created successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get all product categories
+const getCategories = async (req, res) => {
+  try {
+    const [categories] = await db.query(
+      "SELECT * FROM categories"
+    );
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+// Update a product category
+const updateCategory = async (req, res) => {
+  try {
+    const { category_id } = req.params;
+    const { category_name } = req.body;
+
+    await db.query(
+      "UPDATE categories SET category_name = ? WHERE category_id = ?",
+      [category_name, category_id]
+    );
+
+    res.json({ message: "Category updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete a product category
+const deleteCategory = async (req, res) => {
+  try {
+    const { category_id } = req.params;
+
+    await db.query("DELETE FROM product_categories WHERE category_id = ?", [category_id]);
+    await db.query("DELETE FROM categories WHERE category_id = ?", [category_id]);
+
+    res.json({ message: "Category deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
   getProducts,
-  getProductById,
-  getProductByCompany,
-  getProductByCategory,
-  getProductByCompanyAndCategory,
-  getCategoriesByCompany,
-  getCategories,
+  getProduct,
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductsByCategory,
+  getProductsByCompany,
+  createCategory,
+  getCategories,
+  updateCategory,
+  deleteCategory,
 };
-

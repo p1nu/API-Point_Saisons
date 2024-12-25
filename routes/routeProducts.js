@@ -1,39 +1,31 @@
 const express = require('express');
 const { 
   getProducts,
-  getProductById,
-  getProductByCompany,
-  getProductByCategory,
-  getProductByCompanyAndCategory,
-  getCategoriesByCompany,
-  getCategories,
+  getProduct,
   createProduct,
   updateProduct,
   deleteProduct,
- } = require('../controller/controllerProducts.js');
+  getProductsByCategory,
+  getProductsByCompany,
+  createCategory,
+  getCategories,
+  updateCategory,
+  deleteCategory,
+} = require('../controller/controllerProducts.js');
 
 const routerProducts = express.Router(); 
 
 // Get all products
 routerProducts.get('/all', getProducts);
 
-// Get a product by id
-routerProducts.get('/:id', getProductById);
-
-// Get products by company id
-routerProducts.get('/company/:id', getProductByCompany);
-
-// Get categories by company id
-routerProducts.get('/company/:id/categories', getCategoriesByCompany);
-
-// Get all categories
-routerProducts.get('/categories', getCategories);
+// Get a product
+routerProducts.get('/:id', getProduct);
 
 // Get products by category
-routerProducts.get('/category/:category', getProductByCategory);
+routerProducts.get('/category/:category_id', getProductsByCategory);
 
-// Get products by company id and category
-routerProducts.get('/company/:company_id/category/:category', getProductByCompanyAndCategory);
+// Get products by company
+routerProducts.get('/company/:company_id', getProductsByCompany);
 
 // Create a new product
 routerProducts.post('/new', createProduct);
@@ -43,5 +35,17 @@ routerProducts.put('/update/:id', updateProduct);
 
 // Delete a product
 routerProducts.delete('/delete/:id', deleteProduct);
+
+// Create a new category
+routerProducts.post('/categories/new', createCategory);
+
+// Get all categories
+routerProducts.get('/categories/all', getCategories);
+
+// Update a category
+routerProducts.put('/categories/update/:id', updateCategory);
+
+// Delete a category
+routerProducts.delete('/categories/delete/:id', deleteCategory);
 
 module.exports = routerProducts;
